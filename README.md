@@ -1,16 +1,16 @@
 # ProGFASTAGen
 
-The ProGFASTAGen (**Pro**tein-**G**raph-**FASTA**-**Gen**erator or **Pro**t**G**raph-**FASTA**-**Gen**erator) repository contains workflows to generate so-called ms2-specific-FASTAs (using the precursor from MGF-files) including feature-peptides, like VARIANTs or CONFLICTs if desired, or global-FASTAs (as described in [ProtGraph](https://github.com/mpc-bioinformatics/ProtGraph)). The single workflow scripts have been implemented with [Nextflow-DSL-2](https://www.nextflow.io/docs/latest/dsl2.html) and are independent to each other. Each of them can be used on their own or can be imported to other workflows for other use-cases. Further, we included three main-workflows, to show how the single workflows can be chained together. The `main_workflow_protein_fasta.nf`-workflow converts Thermo-RAW-files into MGF, searches with Comet (and Percolator) and the identification results are then further summarized. The workflows `main_workflow_global_fasta.nf` and `main_workflow_ms2_specific_fasta.nf` generate specific FASTA-files before search-engine-identification. Below are example nextflow-calls, which can be used.
+The ProGFASTAGen (**Pro**tein-**G**raph-**FASTA**-**Gen**erator or **Pro**t**G**raph-**FASTA**-**Gen**erator) repository contains workflows to generate so-called ms2-specific-FASTAs (using the precursors from MGF-files) including feature-peptides, like VARIANTs or CONFLICTs if desired, or global-FASTAs (as described in [ProtGraph](https://github.com/mpc-bioinformatics/ProtGraph)). The single workflow scripts have been implemented with [Nextflow-DSL-2](https://www.nextflow.io/docs/latest/dsl2.html) and are independent to each other. Each of them can be used on their own or can be imported to other workflows for other use-cases. Further, we included three main-workflows, to show how the single workflows can be chained together. The `main_workflow_protein_fasta.nf`-workflow converts Thermo-RAW-files into MGF, searches with Comet (and Percolator) and the identification results are then further summarized. The workflows `main_workflow_global_fasta.nf` and `main_workflow_ms2_specific_fasta.nf` generate specific FASTA-files before search-engine-identification. Below are example nextflow-calls, which can be used.
 
-Regarding, the ms2-specific-FASTA-Generation: The source-code of the C++ implementation for traversal can be found in `bin`. There, four implementations are present: `Float/Int`-Versions of the traversal as well as `DryRun/VarLimitter`-Versions of the traversal. The `Float/Int`-Versions can be faster/slower on some specific processors and both versions can be used via a flag in the workflows. The `DryRun`-Version does not generate a FASTA but tests the used system (depending on a query-timeout) to determine the maximum number of variants which can be used, while not timing out. The actual FASTA-Generation happens in the `VarLimitter`-Version using the generated protein-graphs at hand.
+Regarding the ms2-specific-FASTA-Generation: The source-code of the C++ implementation for traversal can be found in `bin`. There, four implementations are present: `Float/Int`-Versions as well as `DryRun/VarLimitter`-Versions of the traversal. The `Float/Int`-Versions can be faster/slower on some specific processors and both versions can be used via a flag in the `create_ms2_specific_fasta.nf`-workflow. The `DryRun`-Version does not generate a FASTA but tests the used system (depending on a query-timeout) to determine the maximum number of variants which can be used, while not timing out. The actual FASTA-Generation happens in the `VarLimitter`-Version using the generated protein-graphs at hand.
 
-in **Prerequisites** a small description of dependencies and how to set up an environment is given. **Individual steps** describes the single workflows and how they can be called, while **Main Workflow Scripts** shows example-calls of the main workflows. In **Regenerate Results from Publication**, the parameters are shown, which were used in the publication and using the same FASTA, SP-EMBL with a similar server-setting should yield similar results as used in the publication.
+in **Prerequisites** a small description of dependencies and how to set up the host system is given. **Individual steps** describes the single workflows and how they can be called, while **Main Workflow Scripts** shows example-calls of the main workflows. In **Regenerate Results from Publication**, the calls and parameters are shown, which were used in the publication. Using the same FASTA, SP-EMBL with a similar server-setting should yield similar results as used in the publication.
 
 ## Prerequisites
 
 ### Executing on Linux
 
-This workflow can be only executed on linux (tested on Ubuntu 22.04 and ArchLinux). Before setting up the `bin`-folder, some requiered binaries are need to be availabe for the OS. (Focusing on Ubuntu:) The following packages need to be installed on Ubuntu (via `apt`):
+This workflow can be only executed on linux (tested on Ubuntu 22.04 and ArchLinux). Before setting up the `bin`-folder, some requiered binaries are need to be present on the OS. (Focusing on Ubuntu:) The following packages need to be installed on Ubuntu (via `apt`), if not already:
 
 ```text
 build-essential
@@ -19,50 +19,75 @@ curl
 unzip
 cmake
 mono-complete
-python3-pip (or any environment with Python3)
-python-is-python3 (needed for ubuntu)
+python3-pip (or any environment with Python3, where pip is available)
+python-is-python3 (needed for ubuntu, so that python points to python3)
 ```
 
-If all required binaries are available, a setup-script needs to be executed, which downloads needed dependencies and compiles the source-code located in the `bin`-folder.
+If all packages are installed (and the python environment is set up), the setup-script needs to be executed, which downloads needed dependencies and compiles the source-code located in the `bin`-folder:
 
 ```shell
 chmod +x compile_and_setup_depencies.sh  # In case this file is not executable
 ./compile_and_setup_depencies.sh  # Downloads dependencies, compiles the C++-implementation and sets all binaries in the bin-folder as executable
 ```
 
-If the above worked without errors, the provided workflows can be executed with the command `nextflow`.
+If the script exits without errors, the provided workflows can be executed with the command `nextflow`.
 
 ### Executing in Docker
 
-Alternatively, docker can be used. For this, please follow the [installation guide](https://docs.docker.com/engine/install/ubuntu/) for docker. After docker has been installed, a local docker-container can be build with all needed dependencies. We provide a `Dockerfile`in the `docker`-folder. To build it: execute (while beeing with a shell in the root-folder of this repository) the following:
+Alternatively, docker can be used. For this, please follow the [installation guide](https://docs.docker.com/engine/install/ubuntu/) for docker. After installing docker, a local docker-container can be build with all needed dependencies for the workflows. We provide a `Dockerfile` in the `docker`-folder. To build it, execute (while beeing with a shell in the root-folder of this repository) the following:
 
 ```shell
 docker build -t progfastagen:local . -f docker/Dockerfile
 ```
 
-Make sure that `nextflow` is installed on the host-system. For each  ofthe workflow example calls below, the `-with-docker progfastagen:local` then needs to be appended.
+This command builds a local docker container, tagging it with `progfastagen:local`, which can be later used by nextflow. To use it with nextflow, make sure that `nextflow` is installed on the host-system. For each of the workflow example calls below, the `-with-docker progfastagen:local` then needs to be appended, to let `nextflow` know to use the local docker-container.
 
 ## Individual Steps
 
-Each step has been implemented in such a way, that it can be executed on its own. Each subsection below, provides a brief overview of the needed parameters to execute the workflow itself. If you are interested for all the available parameters and want to tune or modify them, then please refer to the source of the workflow, where each parameters is described briefly.
+Each step has been implemented in such a way, that it can be executed on its own. Each subsection below, provides a brief overview and an example call of the required parameters to demonstrate how the workflow can be called. If you are interested for all the available parameters within a workflow and want modify or tune them, then please refer to the source of the workflows, where each parameters is described briefly.
 
 ### Converting RAW-files to MGF
 
-This workflow converts RAW-files to the MGF-format. The `ctm_raws` parameter is required, in order to generate the MGF-files
+The workflow `convert_to_mgf.nf` is a wrapper around the ThermoRawFileparser and converts RAW-files to the MGF-format. The `ctm_raws` parameter needs to be set, in order to generate the MGF-files:
 
 ```text
 nextflow run convert_to_mgf.nf \
-    -- ctm_raws < Folder containing RAW-files > \
-    -- ctm_outdir < Output-Folder, where the MGFs are stored >
+    --ctm_raws < Folder containing RAW-files > \
+    --ctm_outdir < Output-Folder, where the MGFs should be stored >
 ```
 
 ### Generating a MS2-Specific-FASTA
 
-TBD
+The workflow `crate_ms2_specific_fasta.nf` generates a ms2-specific-FASTA-file, tailored to a set of MGF-files. Here, Protein-Graphs are generated, using an SP-EMBL-file (which can be downloaded from [UniProt](https://www.uniprot.org/)) and a python script prepares the queries, by extracting the MS2-precursors from the MGF-files (using a tolerance, in ppm). Using the Protein-Graphs and a `DryRun`-Version of the traversal, the maximum-variant-limits are determined for each Protein-Graph (and mass-query-range) using a binary-search. These limits are then used for the actual ms2-specific-FASTA-generation in conjunction with the extracted MS2-precursors and a compacted FASTA is returned, which is tailored to the MGF-files.
+
+Altough of the complexity, the workflow only requires the following input to generate such a FASTA:
+
+```text
+nextflow run convert_to_mgf.nf \
+    --cmf_mgf_files < Folder containing MGF-files >\
+    --cmf_sp_embl_file < Path to a SP-EMBL-File > \
+    --cmf_outdir <The Output-Folder where the traversal-limits are saved and the ms2-specific-FASTA is stored >
+```
+
+The optional parameter: `cmf_pg_additional_params` is added to ProtGraph directly, allowing every parameter, ProtGraph provides to be set there (e.g. digestion, included/excluded features, PTMs, etc...), allowing arbitrary settings to generate Protein-Graphs if desired. It defaults to use all features, ProtGraph can parse.
+
+**Note regarding PTMs/Tolerance**: The FASTA is tailored to the MS2-precursors, therefore variable and fixed modifications should be set to the same as for the actual identification. This workflow defaults to carbamidomethylation (C, fixed) and oxidation (M, variable). See ProtGraph (and the workflow-parameter `cmf_pg_additional_params`) to set the PTMs accordingly in the Protein-Graphs. The same applies for the MS2-precursor-tolereance which can be set with `cmf_query_ppm` and defaults to `5ppm`.
+
+**Note regarding Limits**: This workflows defaults to allow up to 5 seconds per query and limits peptides to contain at most 5 variants (with a maximum of 5000 Da per peptide), resulting into FASTA-files which can be 15-200GB large (depending on dataset and species). Changing these settings can drastically increase/decrease the runtime/memory usage/disk usage. We advise to change those settings slightly and to pay attention on the runtime/memory usage/disk usage if run with the newly set limits (and dataset + species) the first time.
 
 ### Generating a Global-FASTA
 
-TBD
+This workflow generates a so called global-FASTA, using ProtGraph, an SP-EMBL and some global limits for writing out peptides/proteins. Global-FASTAs can be generated with the `create_global_fasta.nf`-workflow. To generate a global-FASTA, only a path to a single SP-EMBL-file is required. Such a file can be downloaded from [UniProt](https://www.uniprot.org/) directly, by selecting `Text` instead of `FASTA` as the download format.
+
+```text
+nextflow run create_global_fasta.nf \
+    --cgf_sp_embl_file < Path to a SP-EMBL-File > \
+    --cgf_outdir < The output-folder, where the gloabl-FASTA and some Protein-Graph-statistics should be saved >
+```
+
+Per default, this workflow does not export feature-peptides and is set to only export peptides with up to 5000 Da mass and maximum of two miscleavages. It is possible to generate global-FASTAs with some specific features (like containing, `SIGNAL`, `PEPTIDE` or others) and other limits. The parameters `cgf_features_in_graphs` and `cgf_peptide_limits` can be set accordingly. These are added to ProtGraph directly, hence every parameter ProtGraph provides, can be set here (including different digestion settings).
+
+**Note**: A dry run with ProtGraph, generating statistics how many peptide would be theoretically exported is advised prior for testing. Some Protein-Graphs (e.g. P53) can contain to many peptides, which could result to very long runtimes and huge FASTAs.
 
 ### Identification via Coment (and Percolator)
 
@@ -71,7 +96,7 @@ This workflow identifies MGF-files individually, using custom search-settings, a
 Example call of all required parameters (here Percolator is also used):
 
 ```text
-nextflow run convert_to_mgf.nf \
+nextflow run identification_via_comet.nf \
     --idc_mgf_folder < Folder containing MGF-files > \
     --idc_fasta_file < The FASTA which should be used for identification > \
     --idc_search_parameter_file < The Comet-Parameters file (Search Configuration) > \
@@ -81,7 +106,7 @@ nextflow run convert_to_mgf.nf \
 Example call, not using Percolator:
 
 ```text
-nextflow run convert_to_mgf.nf \
+nextflow run identification_via_comet.nf \
     --idc_mgf_folder < Folder containing MGF-files > \
     --idc_fasta_file < The FASTA which should be used for identification > \
     --idc_search_parameter_file < The Comet-Parameters file (Search Configuration) > \
@@ -89,9 +114,7 @@ nextflow run convert_to_mgf.nf \
     --idc_use_percolator 0
 ```
 
-
-
-**NOTE**: This workflow defaults to an fdr-cutoff (q-value) of `--idc_fdr "0.01|0.05"`, reporting both FDRs. Arbitrary and multiple FDR-cutoffs can be set and should be changed to the desired value.
+**Note**: This workflow defaults to an fdr-cutoff (q-value) of `--idc_fdr "0.01|0.05"`, reporting both FDRs. Arbitrary and multiple FDR-cutoffs can be set and should be changed to the desired value.
 
 ### Summarization of results
 
