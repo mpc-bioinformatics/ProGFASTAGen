@@ -10,7 +10,7 @@ params.idc_export_data = "true"  // Boolean, if true, will export data into idc_
 
 
 // Optional Parameters for Comet, Usage of Percolator and FDR
-params.idc_tda = 1  // Comet-Parameter: 0 -->  Do not append database with decoys | 1 --> Append decoys to database (if set to 1 it generates the reversed sequence as decoys using "DECOY_" as the prefix)
+params.idc_tda = 1  // Comet-Parameter: 0 -->  Do not append database with decoys. (Please then provide a FASTA with DECOY_ prefixed to indicate decoy entries in the FASTA) | 1 --> Append decoys to database (if set to 1 it generates the reversed sequence as decoys using "DECOY_" as the prefix)
 params.idc_num_parallel_threads_per_search = 4   // Number of threads used in Comet per search. From experience, a value between 4 to 16 is usually enough.
 params.idc_use_percolator = 1  // 0 --> Do not use, 1 --> Use percolator for rescoring the identification results
 params.idc_use_n_hits = 1  // Number of hits per spectrum to be used in FDR-Calulcation (CAUTION: can skew the results, if set higher)
