@@ -40,11 +40,11 @@ Alternatively, docker can be used. For this, please follow the [installation gui
 docker build -t progfastagen:local . -f docker/Dockerfile
 ```
 
-Make sure that `nextflow` installed on the host-system. For each  ofthe workflow example calls below, the `-with-docker progfastagen:local` then needs to be appended.
+Make sure that `nextflow` is installed on the host-system. For each  ofthe workflow example calls below, the `-with-docker progfastagen:local` then needs to be appended.
 
 ## Individual Steps
 
-Each step has been implemented in such a way, that it can be executed on its own. Each subsection below, provides a brief overview of the needed parameters to execute the workflow itself. If you are interested for all the available parameters and want to tune or modify them, then please refer to the source of the workflow, whre each parameters is described briefly.
+Each step has been implemented in such a way, that it can be executed on its own. Each subsection below, provides a brief overview of the needed parameters to execute the workflow itself. If you are interested for all the available parameters and want to tune or modify them, then please refer to the source of the workflow, where each parameters is described briefly.
 
 ### Converting RAW-files to MGF
 
@@ -68,6 +68,16 @@ TBD
 
 This workflow identifies MGF-files individually, using custom search-settings, applies an FDR-cutoff using the q-value afterwards (for each file) and exposes the identification results into an output-folder.
 
+Example call of all required parameters (here Percolator is also used):
+
+```text
+nextflow run convert_to_mgf.nf \
+    --idc_mgf_folder < Folder containing MGF-files > \
+    --idc_fasta_file < The FASTA which should be used for identification > \
+    --idc_search_parameter_file < The Comet-Parameters file (Search Configuration) > \
+    --idc_outdir < Output-Folder where the results of the identification files are stored >
+```
+
 Example call, not using Percolator:
 
 ```text
@@ -79,15 +89,7 @@ nextflow run convert_to_mgf.nf \
     --idc_use_percolator 0
 ```
 
-Example call, using Percolator:
 
-```text
-nextflow run convert_to_mgf.nf \
-    --idc_mgf_folder < Folder containing MGF-files > \
-    --idc_fasta_file < The FASTA which should be used for identification > \
-    --idc_search_parameter_file < The Comet-Parameters file (Search Configuration) > \
-    --idc_outdir < Output-Folder where the results of the identification files are stored >
-```
 
 **NOTE**: This workflow defaults to an fdr-cutoff (q-value) of `--idc_fdr "0.01|0.05"`, reporting both FDRs. Arbitrary and multiple FDR-cutoffs can be set and should be changed to the desired value.
 
