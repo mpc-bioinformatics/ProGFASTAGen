@@ -48,7 +48,7 @@ Each step has been implemented in such a way, that it can be executed on its own
 
 ### Converting RAW-files to MGF
 
-The workflow `convert_to_mgf.nf` is a wrapper around the ThermoRawFileparser and converts RAW-files to the MGF-format. The `ctm_raws` parameter needs to be set, in order to generate the MGF-files:
+The workflow `convert_to_mgf.nf` is a wrapper around the ThermoRawFileParser and converts RAW-files to the MGF-format. The `ctm_raws` parameter needs to be set, in order to generate the MGF-files:
 
 ```text
 nextflow run convert_to_mgf.nf \
@@ -58,7 +58,7 @@ nextflow run convert_to_mgf.nf \
 
 ### Generating a MS2-Specific-FASTA
 
-The workflow `crate_ms2_specific_fasta.nf` generates a ms2-specific-FASTA-file, tailored to a set of MGF-files. Here, Protein-Graphs are generated, using an SP-EMBL-file (which can be downloaded from [UniProt](https://www.uniprot.org/) by selecting `Text` as format) and a python script prepares the queries, by extracting the MS2-precursors from the MGF-files (using a tolerance, in ppm). Using the Protein-Graphs and a `DryRun`-Version of the traversal, the maximum-variant-limits are determined for each Protein-Graph (and mass-query-range) using a binary-search. These limits are then used for the actual ms2-specific-FASTA-generation in conjunction with the extracted MS2-precursors and a compacted FASTA is returned, which is tailored to the MGF-files.
+The workflow `create_ms2_specific_fasta.nf` generates a ms2-specific-FASTA-file, tailored to a set of MGF-files. Here, Protein-Graphs are generated, using an SP-EMBL-file (which can be downloaded from [UniProt](https://www.uniprot.org/) by selecting `Text` as format) and a python script prepares the queries, by extracting the MS2-precursors from the MGF-files (using a tolerance, in ppm). Using the Protein-Graphs and a `DryRun`-Version of the traversal, the maximum-variant-limits are determined for each Protein-Graph (and mass-query-range) using a binary-search. These limits are then used for the actual ms2-specific-FASTA-generation in conjunction with the extracted MS2-precursors and a compacted FASTA is returned, which is tailored to the MGF-files.
 
 Altough of the complexity, the workflow only requires the following parameters to generate such a FASTA:
 
@@ -87,7 +87,7 @@ nextflow run create_global_fasta.nf \
     --cgf_outdir < The output-folder, where the gloabl-FASTA and some Protein-Graph-statistics should be saved >
 ```
 
-Per default, this workflow does not export feature-peptides and is set to only export peptides with up to 5000 Da mass and maximum of two miscleavages. It is possible to generate global-FASTAs with some specific features (like containing, `SIGNAL`, `PEPTIDE` or others) and other limits. The parameters `cgf_features_in_graphs` and `cgf_peptide_limits` can be set accordingly. These are added to ProtGraph directly, hence every parameter ProtGraph provides, can be set here (including different digestion settings).
+Per default, this workflow does not export feature-peptides and is set to only export peptides with up to 5000 Da mass and maximum of two miscleavages. It is possible to generate global-FASTA with some specific features (like containing, `SIGNAL`, `PEPTIDE` or others) and other limits. The parameters `cgf_features_in_graphs` and `cgf_peptide_limits` can be set accordingly. These are added to ProtGraph directly, hence every parameter ProtGraph provides, can be set here (including different digestion settings).
 
 **Note**: A dry run with ProtGraph to generate statistics how many peptide would be theoretically exported is advised prior for testing. Some Protein-Graphs with some features (e.g. P53 using variants) can contain to many peptides, which could result to very long runtimes and huge FASTAs.
 
@@ -128,7 +128,7 @@ nextflow run identification_via_comet.nf \
 
 ### Summarization of results
 
-The `summarize_ident_results.nf`-workflow genereate convenient summarization of the identification results. Here, the identification-results are binned into 4 groups:
+The `summarize_ident_results.nf`-workflow genereates convenient summarization of the identification results. Here, the identification-results are binned into 4 groups:
 
 1. Unique PSMs (a match, which can only originate from one protein)
 2. Shared PSMs (a match, which can originate from multiple proteins)
@@ -177,7 +177,7 @@ nextflow run main_workflow_protein_fasta.nf \
     --main_outdir < Output-Folder where all the results from the workflows should be saved >
 ```
 
-This is also true for the other two workflows, where instead of a FASTA-file, an SP-EMBL-file needs to be provided. Such a file can be downloaded from [UniProt](https://www.uniprot.org/) directly, by selecting the format `Text`.
+This is also true for the other two workflows, where instead of a FASTA-file, an SP-EMBL-file needs to be provided. Such a file can be downloaded from [UniProt](https://www.uniprot.org/) directly, by selecting the format `Text` instead of the format `FASTA`.
 
 Here are the correpsonding calls for global-FASTA and ms2-specific-FASTA generation and identification:
 
