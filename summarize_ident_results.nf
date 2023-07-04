@@ -2,7 +2,7 @@
 nextflow.enable.dsl=2
 
 // Required Parameters
-params.sir_identified_files_blob = "$PWD/results/*qvalue_no_decoys_fdr_0.01.tsv"  // Input-blob of the identification tsvs, containing the followoing columns: "fasta_acc", "fasta_desc", "plain_peptide", "num", (needed to filter out only the top hits) and "source_file"
+params.sir_identified_files_glob = "$PWD/results/*qvalue_no_decoys_fdr_0.01.tsv"  // Input-blob of the identification tsvs, containing the followoing columns: "fasta_acc", "fasta_desc", "plain_peptide", "num", (needed to filter out only the top hits) and "source_file"
 params.sir_outdir = "$PWD/results" // Output-Directory of the statistics
 params.sir_export_data = "true"  // Boolean, if true, will export data into sir_outdir
 
@@ -16,7 +16,7 @@ params.sir_count_same_protein_as_unique = true // Flag if proteins are counted a
 // Standalone Workflow
 workflow {
     // Collect all idents and prepare for workflow input
-    identi_results = Channel.fromPath(params.sir_identified_files_blob)
+    identi_results = Channel.fromPath(params.sir_identified_files_glob)
     post_fix_idents_single = identi_results.combine(Channel.of(params.sir_post_fix))
     pf_idents_grouped = post_fix_idents_single.groupTuple(by: 1).map {tuple(it[1], it[0])}
 
