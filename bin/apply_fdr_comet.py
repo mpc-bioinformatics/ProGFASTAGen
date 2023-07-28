@@ -71,7 +71,7 @@ def apply_fdr(entries: list, protein_idx: int, consider_entry_based_on_num = lam
 
             # Append Info
             additional_info.append([
-                num_decs / (num_decs + num_hits),  # qvalue: This is currently not the qvalue and will be updated later
+                num_decs / (num_hits),  # qvalue: This is currently not the qvalue and will be updated later
                 all(is_decoy),  # is decoy
                 ",".join(accessions)  # fasta_acc
             ])
