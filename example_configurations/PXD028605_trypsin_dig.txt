@@ -12,7 +12,7 @@ num_threads = 0                        # 0=poll CPU to set num threads; else spe
 #
 # masses
 #
-peptide_mass_tolerance = 20.00
+peptide_mass_tolerance = 10.00
 peptide_mass_units = 2                 # 0=amu, 1=mmu, 2=ppm
 mass_type_parent = 1                   # 0=average masses, 1=monoisotopic masses
 mass_type_fragment = 1                 # 0=average masses, 1=monoisotopic masses
@@ -71,7 +71,7 @@ output_pepxmlfile = 0                  # 0=no, 1=yes  write pepXML file
 output_mzidentmlfile = 1               # 0=no, 1=yes  write mzIdentML file
 output_percolatorfile = 0              # 0=no, 1=yes  write Percolator pin file
 print_expect_score = 1                 # 0=no, 1=yes to replace Sp with expect in out & sqt
-num_output_lines = 5                   # num peptide results to show
+num_output_lines = 1                   # num peptide results to show
 
 sample_enzyme_number = 1               # Sample enzyme which is possibly different than the one applied to the search.
                                        # Used to calculate NTT & NMC in pepXML output (default=1 for trypsin).

@@ -27,7 +27,7 @@ params.sir_count_same_protein_as_unique = true
 // Import Workflows
 PROJECT_DIR = workflow.projectDir
 include {convert_to_mgf} from PROJECT_DIR + '/convert_to_mgf.nf'
-include {create_ms2_specific_fasta} from PROJECT_DIR + '/create_ms2_specific_fasta.nf'
+include {create_precursor_specific_fasta} from PROJECT_DIR + '/create_precursor_specific_fasta.nf'
 include {identification_via_comet} from PROJECT_DIR + '/identification_via_comet.nf'
 include {summarize_ident_results} from PROJECT_DIR + '/summarize_ident_results.nf'
 
@@ -56,12 +56,12 @@ workflow main_workflow_global_fasta {
         convert_to_mgf(raw_files)
 
         // Generate FASTA
-        create_ms2_specific_fasta(convert_to_mgf.out, sp_embl_file) 
+        create_precursor_specific_fasta(convert_to_mgf.out, sp_embl_file) 
 
         // Search via Comet (+ Percolator if set)
         identification_via_comet(
             convert_to_mgf.out,
-            create_ms2_specific_fasta.out,
+            create_precursor_specific_fasta.out,
             comet_parameters_file
         )
 

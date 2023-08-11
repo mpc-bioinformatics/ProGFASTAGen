@@ -71,7 +71,7 @@ output_pepxmlfile = 0                  # 0=no, 1=yes  write pepXML file
 output_mzidentmlfile = 1               # 0=no, 1=yes  write mzIdentML file
 output_percolatorfile = 0              # 0=no, 1=yes  write Percolator pin file
 print_expect_score = 1                 # 0=no, 1=yes to replace Sp with expect in out & sqt
-num_output_lines = 5                   # num peptide results to show
+num_output_lines = 1                   # num peptide results to show
 
 sample_enzyme_number = 1               # Sample enzyme which is possibly different than the one applied to the search.
                                        # Used to calculate NTT & NMC in pepXML output (default=1 for trypsin).

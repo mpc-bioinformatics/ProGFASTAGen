@@ -33,11 +33,11 @@ workflow {
     // Get SP-EMBL file
     sp_embl_file = Channel.fromPath(params.cmf_sp_embl_file)
 
-    create_ms2_specific_fasta(mgfs, sp_embl_file)
+    create_precursor_specific_fasta(mgfs, sp_embl_file)
 }
 
 // Importable Workflow
-workflow create_ms2_specific_fasta {
+workflow create_precursor_specific_fasta {
     take:
         // Takes MGF-files
         mgf_files
@@ -69,10 +69,10 @@ workflow create_ms2_specific_fasta {
 
         // Create the ms2-specific FASTA.
         // This process is executed on its own without any other process, to reduce the possibility of DeadLocks
-        create_ms2_specific_fasta_via_protgraphcpp(pgs_limits_and_query)
+        create_precursor_specific_fasta_via_protgraphcpp(pgs_limits_and_query)
 
         // Merge duplicated entries into a single entry to ensure that the FASTA is "Sequence-Unique" (--> IOW: Each sequence only occurs once in the FASTA)
-        compact_fasta(create_ms2_specific_fasta_via_protgraphcpp.out)
+        compact_fasta(create_precursor_specific_fasta_via_protgraphcpp.out)
     emit:
         // Retruns each MGF, converted from a RAW-file
         compact_fasta.out
@@ -187,7 +187,7 @@ process determine_limits_using_binary_search {
     """
 }
 
-process create_ms2_specific_fasta_via_protgraphcpp {
+process create_precursor_specific_fasta_via_protgraphcpp {
     cpus Runtime.runtime.availableProcessors() // Tell Nextflow, that it uses all processors, to ensure that this step is not distrubed by other processes
 
     input:
