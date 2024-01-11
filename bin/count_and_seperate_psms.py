@@ -12,7 +12,7 @@ from collections import defaultdict
 # Constants
 REGEX_PG_HEADER = r"[A-Z0-9-_]+?\(.*?\)"
 REGEX_GET_VARMODS = r"VARMOD\[.*?\](?:,|)"
-STRINGS_CONSIDERED_FEATURES = ["CONFLICT", "SIGNAL", "INIT_MET", "PROPEP", "PEPTIDE", "MUTAGEN", "VARIANT"]
+STRINGS_CONSIDERED_FEATURES = ["CONFLICT", "SIGNAL", "INIT_MET", "PROPEP", "PEPTIDE", "MUTAGEN", "VARIANT", "CHAIN"]
 
 
 def parse_args():
