@@ -14,7 +14,7 @@ params.idc_tda = 1  // Comet-Parameter: 0 -->  Do not append database with decoy
 params.idc_num_parallel_threads_per_search = 4   // Number of threads used in Comet per search. From experience, a value between 4 to 16 is usually enough.
 params.idc_use_percolator = 1  // 0 --> Do not use, 1 --> Use percolator for rescoring the identification results
 params.idc_use_n_hits = 1  // Number of hits per spectrum to be used in FDR-Calulcation (CAUTION: can skew the results, if set higher)
-params.idc_fdr = "0.01|0.05" // FDR/qvalue used for cutoff of the identification results. You can specify multiple ones using |. E.G.: "0.01|0.05"
+params.idc_fdr = "0.01" // FDR/qvalue used for cutoff of the identification results. You can specify multiple ones using |. E.G.: "0.01|0.05"
 
 
 // Standalone Workflow

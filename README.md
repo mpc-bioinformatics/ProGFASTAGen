@@ -2,9 +2,9 @@
 
 The ProGFASTAGen (**Pro**tein-**G**raph-**FASTA**-**Gen**erator or **Pro**t**G**raph-**FASTA**-**Gen**erator) repository contains workflows to generate so-called precursor-specific-FASTAs (using the precursors from MGF-files) including feature-peptides, like VARIANTs or CONFLICTs if desired, or global-FASTAs (as described in [ProtGraph](https://github.com/mpc-bioinformatics/ProtGraph)). The single workflow scripts have been implemented with [Nextflow-DSL-2](https://www.nextflow.io/docs/latest/dsl2.html) and are independent to each other. Each of these workflows can be used on their own or can be imported to other workflows for other use-cases. Further, we included three main-workflows, to show how the single workflows can be chained together. The `main_workflow_protein_fasta.nf`-workflow converts Thermo-RAW-files into MGF, searches with Comet (and Percolator) and the identification results are then further summarized. The workflows `main_workflow_global_fasta.nf` and `main_workflow_precursor_specific_fasta.nf` generate specific FASTA-files before search-engine-identification. Below are example nextflow-calls, which can be used.
 
-Regarding the precursor-specific-FASTA-generation: The source-code of the C++ implementation for traversal can be found in `bin`. There, four implementations are present: `Float/Int`-Versions as well as `DryRun/VarLimitter`-Versions of the traversal. The `Float/Int`-Versions can be faster/slower on some specific processors and both versions can be used via a flag in the `create_precursor_specific_fasta.nf`-workflow. The `DryRun`-Version does not generate a FASTA but tests the used system (depending on a query-timeout) to determine the maximum number of variants which can be used, while not timing out. The actual FASTA-generation happens in the `VarLimitter`-Version using the generated protein-graphs at hand.
+Regarding the precursor-specific-FASTA-generation: The source-code of the C++ implementation for traversal can be found in `bin`. There, four implementations are present: `Float/Int`-Versions as well as `DryRun/VarLimitter`-Versions of the traversal. The `Float/Int`-Versions can be faster/slower depending on th processor-architecture and can be used via a flag in the `create_precursor_specific_fasta.nf`-workflow. The `DryRun`-Version does not generate a FASTA but tests the used system (depending on a query-timeout) to determine the maximum number of variants which can be used, while not timing out. The actual FASTA-generation happens in the `VarLimitter`-Version using the generated protein-graphs at hand.
 
-in **Prerequisites** a small description of dependencies and how to set up the host system is given. **Individual steps** describes the single workflows and how they can be called, while **Main Workflow Scripts** shows example-calls of the main workflows. In **Regenerate Results from Publication**, the calls and parameters are shown, which were used in the publication. Using the same FASTA, SP-EMBL with a similar server-setting should yield similar results as used in the publication.
+in **Prerequisites** a small description of dependencies and how to set up the host system is given. **Individual steps** describes the single workflows and how they can be called, while **Main Workflow Scripts** shows example-calls of the main workflows. In **Regenerate Results from Publication**, the calls and parameters are shown, which were used in the publication. Using the same FASTA or UniProt flat file format with a similar server-setting should yield similar results as used in the publication.
 
 ## Prerequisites
 
@@ -58,18 +58,18 @@ nextflow run convert_to_mgf.nf \
 
 ### Generating a Precursor-Specific-FASTA
 
-The workflow `create_precursor_specific_fasta.nf` generates a precursor-specific-FASTA-file, tailored to a set of MGF-files. Here, Protein-Graphs are generated, using an SP-EMBL-file (which can be downloaded from [UniProt](https://www.uniprot.org/) by selecting `Text` as format) and a python script prepares the queries, by extracting the MS2-precursors from the MGF-files (using a tolerance, in ppm). Using the Protein-Graphs and a `DryRun`-Version of the traversal, the maximum-variant-limits are determined for each Protein-Graph (and mass-query-range) using a binary-search. These limits are then used for the actual ms2-specific-FASTA-generation in conjunction with the extracted MS2-precursors and a compacted FASTA is returned, which is tailored to the MGF-files.
+The workflow `create_precursor_specific_fasta.nf` generates a precursor-specific-FASTA-file, tailored to a set of MGF-files. Here, Protein-Graphs are generated, using the UniProt flat file format (which can be downloaded from [UniProt](https://www.uniprot.org/) by selecting `Text` as format) and a python script prepares the queries, by extracting the MS2-precursors from the MGF-files (using a tolerance, in ppm). Using the Protein-Graphs and a `DryRun`-Version of the traversal, the maximum-variant-limits are determined for each Protein-Graph (and mass-query-range) using a binary-search. These limits are then used for the actual ms2-specific-FASTA-generation in conjunction with the extracted MS2-precursors and a compacted FASTA is returned, which is tailored to the MGF-files.
 
 Altough of the complexity, the workflow only requires the following parameters to generate such a FASTA:
 
 ```text
-nextflow run convert_to_mgf.nf \
+nextflow run create_precursor_specific_fasta.nf \
     --cmf_mgf_files < Folder containing MGF-files > \
-    --cmf_sp_embl_file < Path to a SP-EMBL-File > \
+    --cmf_sp_embl_file < Path to a SP-EMBL-File (UniProt flat file format) > \
     --cmf_outdir <The Output-Folder where the traversal-limits are saved and the ms2-specific-FASTA is stored >
 ```
 
-The optional parameter: `cmf_pg_additional_params` is added to ProtGraph directly, allowing every parameter, ProtGraph provides to be set there (e.g. usefull if the digestion should be changed or features/PTMs should be included/excluded, etc...), allowing arbitrary settings to generate Protein-Graphs if desired. It defaults to use all features, ProtGraph can parse.
+The optional parameter: `cmf_pg_additional_params` is added to ProtGraph directly, allowing every parameter, ProtGraph provides to be set there (e.g. useful if the digestion should be changed or features/PTMs should be included/excluded, etc...), allowing arbitrary settings to generate Protein-Graphs if desired. It defaults to use all features, ProtGraph can parse.
 
 **Note regarding PTMs/Tolerance**: The FASTA is tailored to the MS2-precursors, therefore variable and fixed modifications need to be set to the same settings as for the actual identification. This workflow defaults to carbamidomethylation (C, fixed) and oxidation (M, variable). See ProtGraph (and the workflow-parameter `cmf_pg_additional_params`) to set the PTMs accordingly in the Protein-Graphs. The same applies for the MS2-precursor-tolereance which can be set with `cmf_query_ppm` and defaults to `5ppm`.
 
@@ -79,11 +79,11 @@ The optional parameter: `cmf_pg_additional_params` is added to ProtGraph directl
 
 ### Generating a Global-FASTA
 
-This workflow generates a so called global-FASTA, using ProtGraph, an SP-EMBL and some global limits for writing out peptides/proteins. Global-FASTAs can be generated with the `create_global_fasta.nf`-workflow. To generate a global-FASTA, only a path to a single SP-EMBL-file is required. Such a file can be downloaded from [UniProt](https://www.uniprot.org/) directly, by selecting `Text` instead of `FASTA` as the download format.
+This workflow generates a so called global-FASTA, using ProtGraph, the UniProt flat file format and some global limits for writing out peptides/proteins. Global-FASTAs can be generated with the `create_global_fasta.nf`-workflow. To generate a global-FASTA, only a path to a single SP-EMBL-file (UniProt flat file format) is required. Such a file can be downloaded from [UniProt](https://www.uniprot.org/) directly, by selecting `Text` instead of `FASTA` as the download format.
 
 ```text
 nextflow run create_global_fasta.nf \
-    --cgf_sp_embl_file < Path to a SP-EMBL-File > \
+    --cgf_sp_embl_file < Path to a SP-EMBL-File (UniProt flat file format) > \
     --cgf_outdir < The output-folder, where the gloabl-FASTA and some Protein-Graph-statistics should be saved >
 ```
 
@@ -124,7 +124,7 @@ nextflow run identification_via_comet.nf \
     --idc_use_percolator 0
 ```
 
-**Note**: This identification-workflow defaults to an FDR-cutoff (q-value) of `--idc_fdr "0.01|0.05"`, reporting both FDRs. Arbitrary and multiple FDR-cutoffs can be set and should be changed to the desired value.
+**Note**: This identification-workflow defaults to an FDR-cutoff (q-value) of `--idc_fdr "0.01"`, reporting only 1% filtered PSMs. Arbitrary and multiple FDR-cutoffs can be set and can be changed to the desired value.
 
 ### Summarization of results
 
@@ -177,35 +177,35 @@ nextflow run main_workflow_protein_fasta.nf \
     --main_outdir < Output-Folder where all the results from the workflows should be saved >
 ```
 
-This is also true for the other two workflows, where instead of a FASTA-file, an SP-EMBL-file needs to be provided. Such a file can be downloaded from [UniProt](https://www.uniprot.org/) directly, by selecting the format `Text` instead of the format `FASTA`.
+This is also true for the other two workflows, where instead of a FASTA-file, the UniProt flat file format needs to be provided. Such a file can be downloaded from [UniProt](https://www.uniprot.org/) directly, by selecting the format `Text` instead of the format `FASTA`.
 
 Here are the correpsonding calls for global-FASTA and precurosr-specific-FASTA generation and identification:
 
 ```text
 # global-FASTA
 nextflow run main_workflow_global_fasta.nf \
-    --main_sp_embl_file < The SP-EMBL-file used for Protein-Graph- and FASTA-generation > \
+    --main_sp_embl_file < The SP-EMBL-file used for Protein-Graph- and FASTA-generation (UniProt flat file format) > \
     --main_raw_files_folder < The folder containing RAW-files > \
     --main_comet_params< The parameters file for comet (for identification) > \
     --main_outdir < Output-Folder where all the results from the workflows should be saved >
 
 # precursor-specific-FASTA
 nextflow run main_workflow_precursor_specific_fasta.nf \
-    --main_sp_embl_file < The SP-EMBL-file used for Protein-Graph- and FASTA-generation > \
+    --main_sp_embl_file < The SP-EMBL-file used for Protein-Graph- and FASTA-generation (UniProt flat file format) > \
     --main_raw_files_folder < The folder containing RAW-files > \
     --main_comet_params < The parameters file for comet (for identification) > \
     --main_outdir < Output-Folder where all the results from the workflows should be saved >
 ```
 
-**Note**: Only defining the required parameters, uses the default parameters for every other setting. For all workflows, this would mean, that the FDR-cutoff (q-value) is set to `0.01|0.05` resulting into both FDRs considered. Furthermore, the global-FASTA and precursor-specific-FASTA workflows assume Trypsin digestion. For the global-FASTA-workflow, no features are exported by default, which may not be desired, if someone whishes to search for peptide-features (like `SIGNAL`, etc..). For the precursor-specific-FASTA-workflow, the PTMs carbamidomethylation (C, fixed) and oxidation (M, variable) are assumed, which may need to be modified.
+**Note**: Only defining the required parameters, uses the default parameters for every other setting. For all workflows, this would mean, that the FDR-cutoff (q-value) is set to `0.01` resulting into both FDRs considered. Furthermore, the global-FASTA and precursor-specific-FASTA workflows assume Trypsin digestion. For the global-FASTA-workflow, no features are exported by default, which may not be desired, if someone whishes to search for peptide-features (like `SIGNAL`, etc..). For the precursor-specific-FASTA-workflow, the PTMs carbamidomethylation (C, fixed) and oxidation (M, variable) are assumed, which may need to be modified.
 
 **Note regarding example calls**: Further below you can find the calls as used in the publication. These set the most minimal parameters for a correct execution on custom datasets and can be used as an example.
 
 ## Regenerate Results from Publication
 
-In this subsection you can find the nextflow-calls which were used to execute the 3 workflows. Executing this with the same SP-EMBL-/FASTA-file should yield the similar/same results. For generated precursor-specific-FASTAs it may happen, that these are generated with slightly different variant-limits, therefore a slightly different FASTA to search with and slightly different identification results.
+In this subsection you can find the nextflow-calls which were used to execute the 3 workflows. Executing this with the same UniProt flat file/FASTA-file should yield the similar/same results. For generated precursor-specific-FASTAs it may happen, that these are generated with slightly different variant-limits, therefore a slightly different FASTA to search with and slightly different identification results.
 
-The FASTA/SP-EMBL used for identification can be found [here](TODO_DL). The Comet configuration files are provided in the `example_configuration`-folder. The datasets can be retrieved from [PRIDE](https://www.ebi.ac.uk/pride/).
+The FASTA/UniProt flat file used for identification can be found [here](https://cloud.mpc.rub.de/s/LJ2bgGNmsxzSaod). The Comet configuration files are provided in the `example_configuration`-folder. The datasets can be retrieved from [PRIDE](https://www.ebi.ac.uk/pride/).
 
 ### PXD002171
 
