@@ -2,7 +2,7 @@
 nextflow.enable.dsl=2
 
 // Required Parameters
-params.cmf_mgf_files = "$PWD/mgfs"  // Input-Directory of MGF-Files, which should be used to generate FASTA-files
+params.cmf_mgf_mzml_files = "$PWD/mgfs"  // Input-Directory of MGF-Files, which should be used to generate FASTA-files
 params.cmf_sp_embl_file = "proteins.txt"  // Database-file in SP-EMBL-Format. E.G.: This can be retrieved from UniProt via the txt-export
 params.cmf_outdir = "$PWD/results"  // Output-Directory of the generated FASTA-files and other intermediate files
 params.cmf_export_data = "true"  // Boolean, if true, will export data into cmf_outdir
@@ -28,23 +28,24 @@ params.cmf_use_floats = 0  // Bool wheather to use floats or integers for the ma
 // Standalone Workflow
 workflow {
     // Get all MGF-files
-    mgfs = Channel.fromPath(params.cmf_mgf_files + "/*.mgf")
+    mgfs = Channel.fromPath(params.cmf_mgf_mzml_files + "/*.mgf")
+    mzmls = Channel.fromPath(params.cmf_mgf_mzml_files + "/*.mzML")
 
     // Get SP-EMBL file
     sp_embl_file = Channel.fromPath(params.cmf_sp_embl_file)
 
-    create_precursor_specific_fasta(mgfs, sp_embl_file)
+    create_precursor_specific_fasta(mgfs.concat(mzmls), sp_embl_file)
 }
 
 // Importable Workflow
 workflow create_precursor_specific_fasta {
     take:
         // Takes MGF-files
-        mgf_files
+        mgf_mzmls_files
         sp_embl_file
     main:
         // Convert the file to MGF
-        generate_query_csvs(mgf_files)
+        generate_query_csvs(mgf_mzmls_files)
 
         // Decide whether we want a single FASTA or a FASTA per file
         if (params.cmf_one_fasta) {
@@ -80,6 +81,8 @@ workflow create_precursor_specific_fasta {
 
 
 process generate_query_csvs {
+    container 'luxii/progfastagen:latest'
+
     input:
     path input_mgf
 
@@ -87,8 +90,8 @@ process generate_query_csvs {
     path "${input_mgf.baseName}.csv"
 
     """
-    PYTHONUNBUFFERED=1 generate_queries_from_mgf.py \\
-        -input_mgf ${input_mgf} \\
+    PYTHONUNBUFFERED=1 generate_queries_from_mgf_mzml.py \\
+        -input_mgf_mzml ${input_mgf} \\
         -out_csv ${input_mgf.baseName}.csv \\
         -max_limit_da ${params.cmf_max_precursor_da} \\
         -ppm ${params.cmf_query_ppm}
@@ -96,6 +99,8 @@ process generate_query_csvs {
 }
 
 process concat_query_csvs {
+    container 'luxii/progfastagen:latest'
+
     input:
     path input_mgf_csv
 
@@ -108,6 +113,8 @@ process concat_query_csvs {
 }
 
 process optimize_query {
+    container 'luxii/progfastagen:latest'
+
     input:
     path input_csv
 
@@ -123,6 +130,7 @@ process optimize_query {
 
 process create_protein_graphs {
     publishDir "${params.cmf_outdir}/", mode:'copy', enabled:"${params.cmf_export_data}"
+    container 'luxii/progfastagen:latest'
 
     input:
     path input_sp_embl
@@ -145,6 +153,7 @@ process create_protein_graphs {
 process determine_limits_using_binary_search {
     publishDir "${params.cmf_outdir}/", mode:'copy', enabled:"${params.cmf_export_data}"
     cpus Runtime.runtime.availableProcessors() // Tell Nextflow, that it uses all processors, to ensure that this step is not distrubed by other processes
+    container 'luxii/progfastagen:latest'
 
     input:
     path database
@@ -189,6 +198,7 @@ process determine_limits_using_binary_search {
 
 process create_precursor_specific_fasta_via_protgraphcpp {
     cpus Runtime.runtime.availableProcessors() // Tell Nextflow, that it uses all processors, to ensure that this step is not distrubed by other processes
+    container 'luxii/progfastagen:latest'
 
     input:
     tuple path(database), path(traversal_limits), path(csv_query)
@@ -211,6 +221,7 @@ process create_precursor_specific_fasta_via_protgraphcpp {
 
 process compact_fasta {
     publishDir "${params.cmf_outdir}/", mode:'copy', enabled:"${params.cmf_export_data}"
+    container 'luxii/progfastagen:latest'
 
     input:
     path input_fasta

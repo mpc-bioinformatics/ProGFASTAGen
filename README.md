@@ -8,9 +8,22 @@ in **Prerequisites** a small description of dependencies and how to set up the h
 
 ## Prerequisites
 
-### Executing on Linux
+### Executing in Docker
 
-This workflow can be only executed on linux (tested on Ubuntu 22.04 and ArchLinux). Before setting up the `bin`-folder, some requiered binaries need to be present on the OS. (Focusing on Ubuntu:) The following packages need to be installed on Ubuntu (via `apt`), if not already:
+We use docker in this workflow for each individual step. For this, please follow the [installation guide](https://docs.docker.com/engine/install/ubuntu/) for docker to have it installed in your system. You can run this workflow as is.
+
+
+A local docker-container can be build with all needed dependencies for the workflows if desired. We provide a `Dockerfile` in the `docker`-folder. To build it, execute (while beeing with a shell in the root-folder of this repository) the following:
+
+```shell
+docker build -t luxii/progfastagen:latest . -f docker/Dockerfile
+```
+
+This command builds a local docker container, tagging it with `luxii/progfastagen:latest`, which can be later used by nextflow.
+
+### Executing on Linux (locally without docker)
+
+This workflow can be executed on linux (tested on Ubuntu 22.04 and ArchLinux). Before setting up the `bin`-folder, some requiered binaries need to be present on the OS. (Focusing on Ubuntu:) The following packages need to be installed on Ubuntu (via `apt`), if not already:
 
 ```text
 build-essential
@@ -31,16 +44,6 @@ chmod +x compile_and_setup_depencies.sh  # In case this file is not executable
 ```
 
 If the script exits without errors, the provided workflows can be executed with the command `nextflow`.
-
-### Executing in Docker
-
-Alternatively, docker can be used. For this, please follow the [installation guide](https://docs.docker.com/engine/install/ubuntu/) for docker. After installing docker, a local docker-container can be build with all needed dependencies for the workflows. We provide a `Dockerfile` in the `docker`-folder. To build it, execute (while beeing with a shell in the root-folder of this repository) the following:
-
-```shell
-docker build -t progfastagen:local . -f docker/Dockerfile
-```
-
-This command builds a local docker container, tagging it with `progfastagen:local`, which can be later used by nextflow. To use it with nextflow, make sure that `nextflow` is installed on the host-system. For each of the workflow example calls below, the `-with-docker progfastagen:local` then needs to be appended, to let `nextflow` know to use the local docker-container.
 
 ## Individual Steps
 
@@ -64,7 +67,7 @@ Altough of the complexity, the workflow only requires the following parameters t
 
 ```text
 nextflow run create_precursor_specific_fasta.nf \
-    --cmf_mgf_files < Folder containing MGF-files > \
+    --cmf_mgf_mzml_files < Folder containing MGF-files > \
     --cmf_sp_embl_file < Path to a SP-EMBL-File (UniProt flat file format) > \
     --cmf_outdir <The Output-Folder where the traversal-limits are saved and the ms2-specific-FASTA is stored >
 ```
@@ -172,7 +175,7 @@ For protein-FASTA identification, only three parameters are required:
 ```text
 nextflow run main_workflow_protein_fasta.nf \
     --main_fasta_file < The FASTA-file, to be used for identification > \
-    --main_raw_files_folder < The folder containing RAW-files > \
+    --main_raw_files_folder < The folder containing RAW/.d-files > \
     --main_comet_params < The parameters file for comet (for identification) > \
     --main_outdir < Output-Folder where all the results from the workflows should be saved >
 ```
@@ -185,14 +188,14 @@ Here are the correpsonding calls for global-FASTA and precurosr-specific-FASTA g
 # global-FASTA
 nextflow run main_workflow_global_fasta.nf \
     --main_sp_embl_file < The SP-EMBL-file used for Protein-Graph- and FASTA-generation (UniProt flat file format) > \
-    --main_raw_files_folder < The folder containing RAW-files > \
+    --main_raw_files_folder < The folder containing RAW/.d-files > \
     --main_comet_params< The parameters file for comet (for identification) > \
     --main_outdir < Output-Folder where all the results from the workflows should be saved >
 
 # precursor-specific-FASTA
 nextflow run main_workflow_precursor_specific_fasta.nf \
     --main_sp_embl_file < The SP-EMBL-file used for Protein-Graph- and FASTA-generation (UniProt flat file format) > \
-    --main_raw_files_folder < The folder containing RAW-files > \
+    --main_raw_files_folder < The folder containing RAW/.d-files > \
     --main_comet_params < The parameters file for comet (for identification) > \
     --main_outdir < Output-Folder where all the results from the workflows should be saved >
 ```

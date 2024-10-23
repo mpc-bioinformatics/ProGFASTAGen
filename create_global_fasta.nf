@@ -36,6 +36,7 @@ workflow create_global_fasta {
 
 process create_sqlite_fasta_database {
     publishDir "${params.cgf_outdir}/", mode:'copy', enabled:"${params.cgf_export_data}"
+    container 'luxii/progfastagen:latest'
 
     input:
     path input_sp_embl
@@ -51,6 +52,7 @@ process create_sqlite_fasta_database {
 
 process convert_pepsqlite_to_fasta {
     publishDir "${params.cgf_outdir}/", mode:'copy', enabled:"${params.cgf_export_data}"
+    container 'luxii/progfastagen:latest'
 
     input:
     path database

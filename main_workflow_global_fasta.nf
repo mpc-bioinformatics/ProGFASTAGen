@@ -3,7 +3,7 @@ nextflow.enable.dsl=2
 
 // Required Parameters (Input-Files)
 params.main_sp_embl_file = "" // The SP-EMBL file of the species to be searched (downloadable from UniProtKB)
-params.main_raw_files_folder = ""  // The folder where the RAW-files are located.
+params.main_raw_files_folder = ""  // The folder where the RAW/.d-files are located.
 params.main_comet_params = ""  // The comet parameter file for search. NOTE: Here the digestion needs to be explicitly set to "no_digestion", since the fasta is already digested (default: digestion is Trypsin)
 
 // Optional Parameters
@@ -35,11 +35,13 @@ include {summarize_ident_results} from PROJECT_DIR + '/summarize_ident_results.n
 workflow {
 	sp_embl_file = Channel.fromPath(params.main_sp_embl_file)
     raw_files = Channel.fromPath(params.main_raw_files_folder  + "/*.raw")
+    d_files = Channel.fromPath(params.main_raw_files_folder  + "/*.d", type: "dir")
     comet_params = Channel.fromPath(params.main_comet_params)
 
     main_workflow_global_fasta(
         sp_embl_file,
         raw_files,
+        d_files,
         comet_params
     )
 }
@@ -49,10 +51,11 @@ workflow main_workflow_global_fasta {
     take:
         sp_embl_file
         raw_files
+        d_files
         comet_parameters_file
     main:
         // Generate MGF-Files
-        convert_to_mgf(raw_files)
+        convert_to_mgf(raw_files, d_files)
 
         // Generate FASTA
         create_global_fasta(sp_embl_file) 

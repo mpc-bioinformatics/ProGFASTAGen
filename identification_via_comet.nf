@@ -82,6 +82,7 @@ workflow identification_via_comet {
 
 process comet_search_mgf {
     cpus params.idc_num_parallel_threads_per_search
+    container 'luxii/progfastagen:latest'
     publishDir "${params.idc_outdir}", mode:'copy', enabled:"${params.idc_export_data}"
 
     input:
@@ -106,6 +107,7 @@ process comet_search_mgf {
 
 process execute_percolator {
     publishDir "${params.idc_outdir}", mode:'copy', enabled:"${params.idc_export_data}"
+    container 'luxii/progfastagen:latest'
 
     input:
     tuple path(txt), path(comet_pin), val(fdr)
@@ -135,6 +137,7 @@ process execute_percolator {
 
 process cutoff_identification_results {
     publishDir "${params.idc_outdir}", mode:'copy', enabled:"${params.idc_export_data}"
+    container 'luxii/progfastagen:latest'
 
     input:
     tuple path(comet_txt), path(perc_tsv), path(fasta), val(fdr)

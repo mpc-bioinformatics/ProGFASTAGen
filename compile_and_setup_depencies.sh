@@ -11,17 +11,6 @@ rm -rf bin/comet.linux.exe
 wget -O bin/comet.linux.exe https://github.com/UWPR/Comet/releases/download/v2023.01.2/comet.linux.exe 
 
 
-### ThermoRawFileParser 1.4.2 Download and extraction
-# Delete previously downloaded ThermoRawFileParser
-rm -rf bin/ThermoRawFileParser
-# Download ThermoRawFileParser
-wget -O trfp.zip https://github.com/compomics/ThermoRawFileParser/releases/download/v1.4.2/ThermoRawFileParser1.4.2.zip
-# Extract archive
-unzip trfp.zip -d bin/ThermoRawFileParser
-# Delete downloaded archive
-rm trfp.zip
-
-
 ### Percolator v3.0.6 Download and extraction
 # Delete previously downloaded OPercolatorpenMS
 rm -rf bin/percolator/
@@ -34,7 +23,6 @@ mkdir -p ./bin/percolator
 tar -xf data.tar.gz -C ./bin/percolator
 # Delete downloaded and extracted deb package
 rm -rf percolator.deb data.tar.gz
-
 
 ##### ProtGraphCPP Traversal Compilation
 
@@ -94,6 +82,13 @@ pip install plotly
 pip install nextflow
 # Needed for parsing xmls (e.g. Percolator output)
 pip install lxml
+# Needed/Optional to convert bruker to mzml
+pip install git+https://github.com/mafreitas/tdf2mzml
+# Needed to convert Bruker to mgf
+pip install alphatims
+# Needed to convert Bruker to mgf
+pip install pyopenms
+
 
 
 ##### Make all files in bin executable (excluding sub-directories) to be visible by processes in Nextflow

@@ -3,7 +3,7 @@ nextflow.enable.dsl=2
 
 // Required Parameters (Input-Files)
 params.main_fasta_file = "" // The FASTA file of the species to be searched (downloadable from UniProtKB)
-params.main_raw_files_folder = ""  // The folder where the RAW-files are located.
+params.main_raw_files_folder = ""  // The folder where the RAW/.d-files are located.
 params.main_comet_params = ""  // The comet parameter file for search. NOTE: Here the digestion should be explicitly turned on (or set appropiately, depending on the input FASTA.)).
 
 // Optional Parameters
@@ -33,11 +33,13 @@ include {summarize_ident_results} from PROJECT_DIR + '/summarize_ident_results.n
 workflow {
 	fasta_file = Channel.fromPath(params.main_fasta_file)
     raw_files = Channel.fromPath(params.main_raw_files_folder  + "/*.raw")
+    d_files = Channel.fromPath(params.main_raw_files_folder  + "/*.d", type: "dir")
     comet_params = Channel.fromPath(params.main_comet_params)
 
     main_workflow_global_fasta(
         fasta_file,
         raw_files,
+        d_files,
         comet_params
     )
 }
@@ -47,10 +49,11 @@ workflow main_workflow_global_fasta {
     take:
         fasta_file
         raw_files
+        d_files
         comet_parameters_file
     main:
         // Generate MGF-Files
-        convert_to_mgf(raw_files)
+        convert_to_mgf(raw_files, d_files)
 
         // Search via Comet (+ Percolator if set)
         identification_via_comet(

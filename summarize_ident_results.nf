@@ -58,6 +58,7 @@ workflow summarize_ident_results {
 
 process concat_to_single_identification_file {
     publishDir "${params.sir_outdir}${post_fix}", mode:'copy', enabled:"${params.sir_export_data}"
+    container 'luxii/progfastagen:latest'
 
     input:
     val post_fix
@@ -78,7 +79,8 @@ process concat_to_single_identification_file {
 
 process seperate_psms {
     publishDir "${params.sir_outdir}${post_fix}", mode:'copy', enabled:"${params.sir_export_data}"
-    
+    container 'luxii/progfastagen:latest'
+
     input:
     val post_fix
     path fdr_filtered_tsv 
@@ -120,6 +122,7 @@ process seperate_psms {
 
 process create_heatmaps {
     publishDir "${params.sir_outdir}${post_fix}", mode:'copy', enabled:"${params.sir_export_data}"
+    container 'luxii/progfastagen:latest'
 
     input:
     tuple val(post_fix), path(tsv_file)
