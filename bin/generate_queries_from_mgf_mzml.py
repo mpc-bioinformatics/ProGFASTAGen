@@ -2,7 +2,7 @@
 
 import argparse
 
-import pyopenms
+import re
 
 # Constants
 HYDROGEN_MONO_MASS = 1.007825035
@@ -71,32 +71,69 @@ def parse_mgf(in_file, ppm):
 
 def parse_mzml(mzml_file, ppm):
     ''' Read all MS2 precursors from mzML '''
-    # Load MZML
-    exp = pyopenms.MSExperiment()
-    pyopenms.MzMLFile().load(mzml_file, exp)
 
-    entries = []
-    for spectrum in exp.getSpectra():
-        if spectrum.getMSLevel() == 2:
-            precs = spectrum.getPrecursors()
-            if len(precs) != 1:
-                raise Exception("Unexpected number of precursors in a MS2-Spectrum")
-            else:
-                # Get mz and Charge
-                pepmass = precs[0].getMZ()
-                charge = precs[0].getCharge()
+    with open(mzml_file, "r") as in_file:
+        # Save all queries in entries
+        entries = []
 
-                # Convert peptide mass to Da
-                da = (float(pepmass) * float(charge)) - (HYDROGEN_MONO_MASS * float(charge))
-                da = da - WATER_MASS  # Subsract H2O-Mass, due to Protein-Graphs not encoding the water mass 
+        # Iterate linewise
+        in_spectrum = False
+        in_precursor = False
+        pepmass = -1
+        charge = 0
+        for line in in_file:
+            # Set in_entry, since we are in a MS2-Spectrum-Entry
+            if line.strip().startswith("<spectrum "):
+                in_spectrum = True
+                continue
 
-                # Get lower and upper limit
-                lower = da - (da / 1000000) * ppm
-                upper = da + (da / 1000000) * ppm
+            if in_spectrum:
+                if line.strip().startswith("<precursor"):
+                    in_precursor = True
+                    continue
+            
+            if in_precursor:
+                # # If in_entry, extract the charge and peptide mass
+                if line.strip().startswith("<cvParam "):
+                    if 'accession="MS:1000744"' in line:                # "selected ion m/z"
+                        m = re.match(r'.*value="([^"]+)".*', line)
+                        if m.group(1):
+                            pepmass = float(m.group(1))
+                        continue
+                    if 'accession="MS:1000041"' in line:                # "charge state"
+                        m = re.match(r'.*value="([^"]+)".*', line)
+                        if m.group(1):
+                            charge = int(m.group(1))
+                        continue
+                
+                if line.strip().startswith("</precursor"):
+                    if (pepmass > 0) and (charge != 0):
+                        # If yes: save the query:
+                        # Convert peptide mass to Da
+                        da = (float(pepmass) * float(charge)) - (HYDROGEN_MONO_MASS * float(charge))
+                        da = da - WATER_MASS  # Subtract H2O-Mass, as Protein-Graphs don't encode the water mass 
 
-                # Append to entries
-                entries.append((lower, upper))
+                        # Get lower and upper limit
+                        lower = da - (da / 1000000) * args.ppm
+                        upper = da + (da / 1000000) * args.ppm
 
+                        # Append to entries
+                        entries.append((lower, upper))
+                    elif (pepmass > 0):
+                        print("no charge: " + pepmass)
+                    
+                    in_precursor = False
+                    pepmass = -1
+                    charge = 0
+                    
+
+            if line.strip().startswith("</spectrum"):
+                # Reset state
+                in_spectrum = False
+                in_precursor = False
+                pepmass = -1
+                charge = 0
+    
     return entries
 
 
