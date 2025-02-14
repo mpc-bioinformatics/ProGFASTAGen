@@ -1,6 +1,6 @@
 # ProGFASTAGen
 
-![Static Badge](https://img.shields.io/badge/publication-10.1093%2Fbib%2Fbbae671-blue?link=https%3A%2F%2Facademic.oup.com%2Fbib%2Farticle%2F26%2F1%2Fbbae671%2F7942791)
+[![Static Badge](https://img.shields.io/badge/publication-10.1093%2Fbib%2Fbbae671-blue?link=https%3A%2F%2Facademic.oup.com%2Fbib%2Farticle%2F26%2F1%2Fbbae671%2F7942791)](https://doi.org/10.1093/bib/bbae671)
 
 The ProGFASTAGen (**Pro**tein-**G**raph-**FASTA**-**Gen**erator or **Pro**t**G**raph-**FASTA**-**Gen**erator) repository contains workflows to generate so-called precursor-specific-FASTAs (using the precursors from MGF-files) including feature-peptides, like VARIANTs or CONFLICTs if desired, or global-FASTAs (as described in [ProtGraph](https://github.com/mpc-bioinformatics/ProtGraph)). The single workflow scripts have been implemented with [Nextflow-DSL-2](https://www.nextflow.io/docs/latest/dsl2.html) and are independent to each other. Each of these workflows can be used on their own or can be imported to other workflows for other use-cases. Further, we included three main-workflows, to show how the single workflows can be chained together. The `main_workflow_protein_fasta.nf`-workflow converts Thermo-RAW-files into MGF, searches with Comet (and Percolator) and the identification results are then further summarized. The workflows `main_workflow_global_fasta.nf` and `main_workflow_precursor_specific_fasta.nf` generate specific FASTA-files before search-engine-identification. Below are example nextflow-calls, which can be used.
 
