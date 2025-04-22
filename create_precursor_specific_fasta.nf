@@ -13,7 +13,7 @@ params.cmf_one_fasta = true  // Flag to generate a fasta for the whole dataset O
 // For Graph-Generation
 params.cmf_max_precursor_da = 5000  // Upper limit of a query in Da. MS2-Precursors higher then this value will be ommitted
 params.cmf_query_ppm = 5  // The ppm (tolereance) which should be used to generate the queries. This should be the same as set in the search engine.
-params.cmf_pg_additional_params = "-ft ALL -fm 'C:57.021464' -vm 'M:15.994915'"  // Additional Parameters which ProtGraph should consider. Add here the features (-ft) which should be included, the fixed and variable modifications (as specified in the search engine via "-fm", "-vm") and also include (if needed) the digestion (-d) or other things. See ProtGraph for a whole list of possible parameters
+params.cmf_pg_additional_params = "-ft VARIANT -ft SIGNAL -ft INIT_MET -ft CONFLICT -ft VAR_SEQ -ft PEPTIDE -ft PROPEP -ft CHAIN -fm 'C:57.021464' -vm 'M:15.9949'"  // Additional Parameters which ProtGraph should consider. Add here the features (-ft) which should be included, the fixed and variable modifications (as specified in the search engine via "-fm", "-vm") and also include (if needed) the digestion (-d) or other things. See ProtGraph for a whole list of possible parameters
 params.cmf_elbpcsr = 32 // Number of PDB-Intervals per Node in a Protein-Graph. This can be arbitrary.
 
 // For Traversal and Limits
