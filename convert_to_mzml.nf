@@ -42,7 +42,7 @@ workflow convert_to_mzml {
 
 process convert_raw_via_thermorawfileparser {
     maxForks params.ctm_num_forks_conversion
-    label progfastagen_thermo_conversion
+    label "progfastagen_thermo_conversion"
     cpus 2 // Currently limited to two conversions at once (due to TRFP: https://github.com/compomics/ThermoRawFileParser/issues/23 )
 
 
