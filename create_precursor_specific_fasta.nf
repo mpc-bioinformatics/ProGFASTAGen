@@ -1,14 +1,15 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
 
-// Required Parameters
+// Required Parameters (defaults are provided as an examples)
 params.cmf_mgf_mzml_files = "$PWD/mgfs"  // Input-Directory of MGF-Files, which should be used to generate FASTA-files
 params.cmf_sp_embl_file = "proteins.txt"  // Database-file in SP-EMBL-Format. E.G.: This can be retrieved from UniProt via the txt-export
 params.cmf_outdir = "$PWD/results"  // Output-Directory of the generated FASTA-files and other intermediate files
-params.cmf_export_data = "true"  // Boolean, if true, will export data into cmf_outdir
+
 
 // Optional Parameters
 params.cmf_one_fasta = true  // Flag to generate a fasta for the whole dataset OR a fasta per MGF-file (true --> only a single FASTA should be generated )
+params.cmf_export_data = "true"  // Boolean, if true, will export data into cmf_outdir
 
 // For Graph-Generation
 params.cmf_max_precursor_da = 5000  // Upper limit of a query in Da. MS2-Precursors higher then this value will be ommitted
@@ -81,7 +82,7 @@ workflow create_precursor_specific_fasta {
 
 
 process generate_query_csvs {
-    container 'luxii/progfastagen:latest'
+    label "progfastagen"
 
     input:
     path input_mgf
@@ -99,7 +100,7 @@ process generate_query_csvs {
 }
 
 process concat_query_csvs {
-    container 'luxii/progfastagen:latest'
+    label "progfastagen"
 
     input:
     path input_mgf_csv
@@ -113,7 +114,7 @@ process concat_query_csvs {
 }
 
 process optimize_query {
-    container 'luxii/progfastagen:latest'
+    label "progfastagen"
 
     input:
     path input_csv
@@ -130,7 +131,7 @@ process optimize_query {
 
 process create_protein_graphs {
     publishDir "${params.cmf_outdir}/", mode:'copy', enabled:"${params.cmf_export_data}"
-    container 'luxii/progfastagen:latest'
+    label "progfastagen"
 
     input:
     path input_sp_embl
@@ -153,7 +154,7 @@ process create_protein_graphs {
 process determine_limits_using_binary_search {
     publishDir "${params.cmf_outdir}/", mode:'copy', enabled:"${params.cmf_export_data}"
     cpus Runtime.runtime.availableProcessors() // Tell Nextflow, that it uses all processors, to ensure that this step is not distrubed by other processes
-    container 'luxii/progfastagen:latest'
+    label "progfastagen"
 
     input:
     path database
@@ -198,7 +199,7 @@ process determine_limits_using_binary_search {
 
 process create_precursor_specific_fasta_via_protgraphcpp {
     cpus Runtime.runtime.availableProcessors() // Tell Nextflow, that it uses all processors, to ensure that this step is not distrubed by other processes
-    container 'luxii/progfastagen:latest'
+    label "progfastagen"
 
     input:
     tuple path(database), path(traversal_limits), path(csv_query)
@@ -221,7 +222,7 @@ process create_precursor_specific_fasta_via_protgraphcpp {
 
 process compact_fasta {
     publishDir "${params.cmf_outdir}/", mode:'copy', enabled:"${params.cmf_export_data}"
-    container 'luxii/progfastagen:latest'
+    label "progfastagen"
 
     input:
     path input_fasta

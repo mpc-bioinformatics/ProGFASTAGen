@@ -1,16 +1,17 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
 
-// Required Parameters
+// Required Parameters (defaults are provided as an examples)
 params.sir_identified_files_glob = "$PWD/results/*qvalue_no_decoys_fdr_0.01.tsv"  // Input-blob of the identification tsvs, containing the followoing columns: "fasta_acc", "fasta_desc", "plain_peptide", "num", (needed to filter out only the top hits) and "source_file"
 params.sir_outdir = "$PWD/results" // Output-Directory of the statistics
-params.sir_export_data = "true"  // Boolean, if true, will export data into sir_outdir
+
 
 // Optional Parameters
 params.sir_post_fix = "" // Postfix for outputting into seperate folder (if executed multiple times)
 params.sir_identification_from_protgraph = true // Flag, if the identification results are from ProtGraph-generated FASTAs. If true we use the "fasta_desc", if false we instead use the "fasta_acc".
 params.sir_remove_variable_modifications = true // Flag if peptides with variable PTMs are removed (--> counted as unique). This is only considered for ProtGraph-Headers/Identification-Results (since the headers in the FASTA can distinguish between modified and not modified peptides).  
 params.sir_count_same_protein_as_unique = true // Flag if proteins are counted as unique (in case of multiple sequences in the same protein). Since it can be only inferred to one protein, true should be set
+params.sir_export_data = "true"  // Boolean, if true, will export data into sir_outdir
 
 
 // Standalone Workflow
@@ -58,7 +59,7 @@ workflow summarize_ident_results {
 
 process concat_to_single_identification_file {
     publishDir "${params.sir_outdir}${post_fix}", mode:'copy', enabled:"${params.sir_export_data}"
-    container 'luxii/progfastagen:latest'
+    label "progfastagen"
 
     input:
     val post_fix
@@ -79,7 +80,7 @@ process concat_to_single_identification_file {
 
 process seperate_psms {
     publishDir "${params.sir_outdir}${post_fix}", mode:'copy', enabled:"${params.sir_export_data}"
-    container 'luxii/progfastagen:latest'
+    label "progfastagen"
 
     input:
     val post_fix
@@ -122,7 +123,7 @@ process seperate_psms {
 
 process create_heatmaps {
     publishDir "${params.sir_outdir}${post_fix}", mode:'copy', enabled:"${params.sir_export_data}"
-    container 'luxii/progfastagen:latest'
+    label "progfastagen"
 
     input:
     tuple val(post_fix), path(tsv_file)

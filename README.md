@@ -18,10 +18,15 @@ We use docker in this workflow for each individual step. For this, please follow
 A local docker-container can be build with all needed dependencies for the workflows if desired. We provide a `Dockerfile` in the `docker`-folder. To build it, execute (while beeing with a shell in the root-folder of this repository) the following:
 
 ```shell
-docker build -t luxii/progfastagen:latest . -f docker/Dockerfile
+# For the released version:
+docker build -t luxii/progfastagen:$(grep 'version = ' nextflow.config | awk -F'"' '{print $2}') . -f docker/Dockerfile 
+# For building the latest version: 
+docker build -t luxii/progfastagen:latest . -f docker/Dockerfile 
+# For development
+docker build -t luxii/progfastagen:development . -f docker/Dockerfile 
 ```
 
-This command builds a local docker container, tagging it with `luxii/progfastagen:latest`, which can be later used by nextflow.
+This command builds a local docker container from this repository, tagging it with `luxii/progfastagen:<version>`. This workflow selects the docker image tag based on the nextflow profile used: the standard profile uses `<version>`, `-profile latest` uses `latest`, and `-profile developer` uses `development`.
 
 ### Executing on Linux (locally without docker)
 

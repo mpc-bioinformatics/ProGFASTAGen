@@ -1,12 +1,11 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
 
-// Required Parameters
+// Required Parameters (defaults are provided as an examples)
 params.idc_mgf_folder = "$PWD/MGFs"  // Input-Directory of MGF-FIles, which should be used for identification
 params.idc_fasta_file = "peptides.fasta"  // Database (FASTA-file) used for identification. Can be with decoys, they should then be prefixed via "DECOY_". E.g. "">sp|XXXXXX|XXXXXX" should be ">DECOY_sp|XXXXXX|XXXXXX"
 params.idc_search_parameter_file = "$PWD/example_configurations/comet_config_high_res.txt"  // Search Parameters for Comet. Defaults can be found in "example_configurations"
 params.idc_outdir = "$PWD/results"  // Output-Directory of the Identification-Results (mulitple output files per input file, extended with fdr_filtered)
-params.idc_export_data = "true"  // Boolean, if true, will export data into idc_outdir
 
 
 // Optional Parameters for Comet, Usage of Percolator and FDR
@@ -15,6 +14,7 @@ params.idc_num_parallel_threads_per_search = 4   // Number of threads used in Co
 params.idc_use_percolator = 1  // 0 --> Do not use, 1 --> Use percolator for rescoring the identification results
 params.idc_use_n_hits = 1  // Number of hits per spectrum to be used in FDR-Calulcation (CAUTION: can skew the results, if set higher)
 params.idc_fdr = "0.01" // FDR/qvalue used for cutoff of the identification results. You can specify multiple ones using |. E.G.: "0.01|0.05"
+params.idc_export_data = "true"  // Boolean, if true, will export data into idc_outdir
 
 
 // Standalone Workflow
@@ -82,7 +82,7 @@ workflow identification_via_comet {
 
 process comet_search_mgf {
     cpus params.idc_num_parallel_threads_per_search
-    container 'luxii/progfastagen:latest'
+    label "progfastagen"
     publishDir "${params.idc_outdir}", mode:'copy', enabled:"${params.idc_export_data}"
 
     input:
@@ -107,7 +107,7 @@ process comet_search_mgf {
 
 process execute_percolator {
     publishDir "${params.idc_outdir}", mode:'copy', enabled:"${params.idc_export_data}"
-    container 'luxii/progfastagen:latest'
+    label "progfastagen"
 
     input:
     tuple path(txt), path(comet_pin), val(fdr)
@@ -137,7 +137,7 @@ process execute_percolator {
 
 process cutoff_identification_results {
     publishDir "${params.idc_outdir}", mode:'copy', enabled:"${params.idc_export_data}"
-    container 'luxii/progfastagen:latest'
+    label "progfastagen"
 
     input:
     tuple path(comet_txt), path(perc_tsv), path(fasta), val(fdr)

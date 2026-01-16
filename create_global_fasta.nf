@@ -1,14 +1,15 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
 
-// Required Parameters
+// Required Parameters (defaults are provided as an examples)
 params.cgf_sp_embl_file = "proteins.txt"  // Database-file in SP-EMBL-Format. E.G.: This can be retrieved from UniProt via the txt-export
 params.cgf_outdir = "$PWD/results"  // Output-Directory of the FASTA-results
-params.cgf_export_data = "true"  // Boolean, if true, will export data into cgf_outdir
+
 
 // Optional Parameters for Protein-Graph Generation
 params.cgf_features_in_graphs = "-ft None"  // Features added to the Protein-Graph (See ProtGraph for more info)
 params.cgf_peptide_limits = "--pep_miscleavages 2 --pep_min_pep_length 5 --pep_max_weight 5000" // Limits used for Exporting peptides from Protein-Graphs (see ProtGraph for more info)
+params.cgf_export_data = "true"  // Boolean, if true, will export data into cgf_outdir
 
 
 // Standalone Workflow
@@ -36,7 +37,7 @@ workflow create_global_fasta {
 
 process create_sqlite_fasta_database {
     publishDir "${params.cgf_outdir}/", mode:'copy', enabled:"${params.cgf_export_data}"
-    container 'luxii/progfastagen:latest'
+    label "progfastagen"
 
     input:
     path input_sp_embl
@@ -52,7 +53,7 @@ process create_sqlite_fasta_database {
 
 process convert_pepsqlite_to_fasta {
     publishDir "${params.cgf_outdir}/", mode:'copy', enabled:"${params.cgf_export_data}"
-    container 'luxii/progfastagen:latest'
+    label "progfastagen"
 
     input:
     path database

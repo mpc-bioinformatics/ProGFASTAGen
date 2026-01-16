@@ -1,15 +1,16 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
 
-// Required Parameters
+// Required Parameters (defaults are provided as an examples)
 params.ctm_raws = "$PWD/raws"  // Directory containing .raw/.d-files
 params.ctm_outdir = "$PWD/results"  // Output-Directory where the MGFs will be stored
-params.ctm_export_data = "true"  // Boolean, if true, will export data into ctm_outdir
+
 
 // Optional Parameters
 params.ctm_additional_params_thermo = "" // Additional paramaters which may be set for conversion
 params.ctm_additional_params_alphatims = "" // Additional paramaters which may be set for conversion
 params.ctm_num_forks_conversion = Runtime.runtime.availableProcessors()  // The maximum number of parallel conversions done at once.
+params.ctm_export_data = "true"  // Boolean, if true, will export data into ctm_outdir
 
 
 // Standalone Workflow
@@ -42,7 +43,7 @@ workflow convert_to_mgf {
 process convert_raw_via_thermorawfileparser {
     maxForks params.ctm_num_forks_conversion
     cpus 2 // Currently limited to two conversions at once (due to TRFP: https://github.com/compomics/ThermoRawFileParser/issues/23 )
-    container 'quay.io/biocontainers/thermorawfileparser:1.4.3--ha8f3691_0'
+    label "progfastagen_thermo_conversion"
 
     publishDir "${params.ctm_outdir}/", mode:'copy', enabled:"${params.ctm_export_data}"
 
@@ -61,7 +62,7 @@ process convert_raw_via_thermorawfileparser {
 process convert_d_via_alphatims {
     maxForks params.ctm_num_forks_conversion
     cpus 2 // hardcoded limit
-    container 'luxii/progfastagen:latest'
+    label "progfastagen"
 
     publishDir "${params.ctm_outdir}/", mode:'copy', enabled:"${params.ctm_export_data}"
 
