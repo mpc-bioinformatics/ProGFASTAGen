@@ -69,7 +69,7 @@ cd $OLDDIR
 ##### Python Dependencies (Python 3.9)
 
 # Protein-Graph-Generation and other exports
-pip install protgraph==0.3.9
+pip install protgraph==0.3.12
 # Needed for exporting SQLite via ProtGraph
 pip install apsw==3.42.0.0
 # Needed to generate compact Excel-Files (HeatMaps)

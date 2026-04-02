@@ -166,8 +166,11 @@ process determine_limits_using_binary_search {
     """
     if [ ${params.cmf_use_floats} -eq 1 ]
     then
+        cmake -B build -S \$(get_cur_bin_dir.sh)/ProtGraphTraverseFloatSourceDryRun
+        cmake --build build
+
         PYTHONUNBUFFERED=1 binary_search_on_protein_graphs.py \\
-            -pgcpp_exe \$(get_cur_bin_dir.sh)/ProtGraphTraverseFloatSourceDryRun/build/protgraphtraversefloatdryrun \\
+            -pgcpp_exe build/protgraphtraversefloatdryrun \\
             -num_processes ${params.cmf_num_procs_traversal} \\
             -protein_graphs_bpcsr ${database} \\
             -out_detailed_statistics traversal_limits_detailed.csv \\
@@ -180,8 +183,11 @@ process determine_limits_using_binary_search {
             -max_limit ${params.cmf_maximum_variant_limit} \\
             -apply_smooting_method median
     else
+        cmake -B build -S \$(get_cur_bin_dir.sh)/ProtGraphTraverseIntSourceDryRun
+        cmake --build build
+
         PYTHONUNBUFFERED=1 binary_search_on_protein_graphs.py \\
-            -pgcpp_exe \$(get_cur_bin_dir.sh)/ProtGraphTraverseIntSourceDryRun/build/protgraphtraverseintdryrun \\
+            -pgcpp_exe build/protgraphtraverseintdryrun \\
             -num_processes ${params.cmf_num_procs_traversal} \\
             -protein_graphs_bpcsr ${database} \\
             -out_detailed_statistics traversal_limits_detailed.csv \\
@@ -210,11 +216,17 @@ process create_precursor_specific_fasta_via_protgraphcpp {
     """
     if [ ${params.cmf_use_floats} -eq 1 ]
     then
-        \$(get_cur_bin_dir.sh)/ProtGraphTraverseFloatSourceVarLimitter/build/protgraphtraversefloatvarlimitter \\
+        cmake -B build -S \$(get_cur_bin_dir.sh)/ProtGraphTraverseFloatSourceVarLimitter
+        cmake --build build
+
+        build/protgraphtraversefloatvarlimitter \\
             ${database} ${csv_query} ${params.cmf_num_procs_traversal} ${csv_query.baseName}.fasta ${traversal_limits}
         # TODO finish implementation
     else
-        \$(get_cur_bin_dir.sh)/ProtGraphTraverseIntSourceVarLimitter/build/protgraphtraverseintvarlimitter \\
+        cmake -B build -S \$(get_cur_bin_dir.sh)/ProtGraphTraverseIntSourceVarLimitter
+        cmake --build build
+
+        build/protgraphtraverseintvarlimitter \\
             ${database} ${csv_query} ${params.cmf_num_procs_traversal} ${csv_query.baseName}.fasta ${traversal_limits}
     fi
     """
