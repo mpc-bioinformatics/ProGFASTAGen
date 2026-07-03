@@ -61,7 +61,7 @@ Each step has been implemented in such a way, that it can be executed on its own
 The workflow `convert_to_mgf.nf` is a wrapper around the ThermoRawFileParser and converts RAW-files to the MGF-format. The `ctm_raws` parameter needs to be set, in order to generate the MGF-files:
 
 ```text
-nextflow run convert_to_mgf.nf \
+NXF_VER=25.10.4 nextflow run convert_to_mgf.nf \
     --ctm_raws < Folder containing RAW-files > \
     --ctm_outdir < Output-Folder, where the MGFs should be stored >
 ```
@@ -73,7 +73,7 @@ The workflow `create_precursor_specific_fasta.nf` generates a precursor-specific
 Altough of the complexity, the workflow only requires the following parameters to generate such a FASTA:
 
 ```text
-nextflow run create_precursor_specific_fasta.nf \
+NXF_VER=25.10.4 nextflow run create_precursor_specific_fasta.nf \
     --cmf_mgf_mzml_files < Folder containing MGF-files > \
     --cmf_sp_embl_file < Path to a SP-EMBL-File (UniProt flat file format) > \
     --cmf_outdir <The Output-Folder where the traversal-limits are saved and the ms2-specific-FASTA is stored >
@@ -92,7 +92,7 @@ The optional parameter: `cmf_pg_additional_params` is added to ProtGraph directl
 This workflow generates a so called global-FASTA, using ProtGraph, the UniProt flat file format and some global limits for writing out peptides/proteins. Global-FASTAs can be generated with the `create_global_fasta.nf`-workflow. To generate a global-FASTA, only a path to a single SP-EMBL-file (UniProt flat file format) is required. Such a file can be downloaded from [UniProt](https://www.uniprot.org/) directly, by selecting `Text` instead of `FASTA` as the download format.
 
 ```text
-nextflow run create_global_fasta.nf \
+NXF_VER=25.10.4 nextflow run create_global_fasta.nf \
     --cgf_sp_embl_file < Path to a SP-EMBL-File (UniProt flat file format) > \
     --cgf_outdir < The output-folder, where the gloabl-FASTA and some Protein-Graph-statistics should be saved >
 ```
@@ -116,7 +116,7 @@ Three parameters are required, to execute the workflow:
 Below is an example call with all required parameters (Percolator is enabled by default):
 
 ```text
-nextflow run identification_via_comet.nf \
+NXF_VER=25.10.4 nextflow run identification_via_comet.nf \
     --idc_mgf_folder < Folder containing MGF-files > \
     --idc_fasta_file < The FASTA which should be used for identification > \
     --idc_search_parameter_file < The Comet-Parameters file (Search Configuration) > \
@@ -126,7 +126,7 @@ nextflow run identification_via_comet.nf \
 Here is another example call with all required parameters (this time, turning Percolator off):
 
 ```text
-nextflow run identification_via_comet.nf \
+NXF_VER=25.10.4 nextflow run identification_via_comet.nf \
     --idc_mgf_folder < Folder containing MGF-files > \
     --idc_fasta_file < The FASTA which should be used for identification > \
     --idc_search_parameter_file < The Comet-Parameters file (Search Configuration) > \
@@ -150,7 +150,7 @@ Furthermore, heatmaps are generated to provide an overview of found peptides acr
 To call this method, a `glob` needs to be specified in this workflow:
 
 ```text
-nextflow run summarize_ident_results.nf \
+NXF_VER=25.10.4 nextflow run summarize_ident_results.nf \
     --sir_identified_files_glob < The glob matching the desired output from the identification results >
     --sir_outdir < The output directory where the summarized results should be saved >
 ```
@@ -158,7 +158,7 @@ nextflow run summarize_ident_results.nf \
 In case, the identification workflow was executed using an FDR of 0.01, you could use the following `glob`:
 
 ```text
-nextflow run summarize_ident_results.nf \
+NXF_VER=25.10.4 nextflow run summarize_ident_results.nf \
     --sir_identified_files_glob "<Path_to_folder>/*qvalue_no_decoys_fdr_0.01.tsv"
     --sir_outdir < The output directory where the summarized results should be saved >
 ```
@@ -180,7 +180,7 @@ In each of these workflows, it is possible to modify the parameters of the impor
 For protein-FASTA identification, only three parameters are required:
 
 ```text
-nextflow run main_workflow_protein_fasta.nf \
+NXF_VER=25.10.4 nextflow run main_workflow_protein_fasta.nf \
     --main_fasta_file < The FASTA-file, to be used for identification > \
     --main_raw_files_folder < The folder containing RAW/.d-files > \
     --main_comet_params < The parameters file for comet (for identification) > \
@@ -193,14 +193,14 @@ Here are the correpsonding calls for global-FASTA and precurosr-specific-FASTA g
 
 ```text
 # global-FASTA
-nextflow run main_workflow_global_fasta.nf \
+NXF_VER=25.10.4 nextflow run main_workflow_global_fasta.nf \
     --main_sp_embl_file < The SP-EMBL-file used for Protein-Graph- and FASTA-generation (UniProt flat file format) > \
     --main_raw_files_folder < The folder containing RAW/.d-files > \
     --main_comet_params< The parameters file for comet (for identification) > \
     --main_outdir < Output-Folder where all the results from the workflows should be saved >
 
 # precursor-specific-FASTA
-nextflow run main_workflow_precursor_specific_fasta.nf \
+NXF_VER=25.10.4 nextflow run main_workflow_precursor_specific_fasta.nf \
     --main_sp_embl_file < The SP-EMBL-file used for Protein-Graph- and FASTA-generation (UniProt flat file format) > \
     --main_raw_files_folder < The folder containing RAW/.d-files > \
     --main_comet_params < The parameters file for comet (for identification) > \
@@ -221,7 +221,7 @@ The FASTA/UniProt flat file used for identification can be found [here](https://
 
 ```shell
 # PXD002171 Precursor-Specific
-nextflow run main_workflow_precursor_specific_fasta.nf \
+NXF_VER=25.10.4 nextflow run main_workflow_precursor_specific_fasta.nf \
     -with-report "PXD002171_results_precursor_specific/nextflow_report.html" \
     -with-timeline "PXD002171_results_precursor_specific/nextflow_timeline.html" \
     --main_sp_embl_file 20230619_homo_sapiens_proteome.txt \
@@ -236,7 +236,7 @@ nextflow run main_workflow_precursor_specific_fasta.nf \
     --idc_fdr "0.01"
     
 # PXD002171 Global digested FASTA
-nextflow run main_workflow_global_fasta.nf \
+NXF_VER=25.10.4 nextflow run main_workflow_global_fasta.nf \
     -with-report "PXD002171_global_fasta/nextflow_report.html" \
     -with-timeline "PXD002171_global_fasta/nextflow_timeline.html" \
     --main_sp_embl_file 20230619_homo_sapiens_proteome.txt \
@@ -248,7 +248,7 @@ nextflow run main_workflow_global_fasta.nf \
     --idc_fdr "0.01"
 
 # PXD002171 Protein FASTA
-nextflow run main_workflow_protein_fasta.nf \
+NXF_VER=25.10.4 nextflow run main_workflow_protein_fasta.nf \
     -with-report "PXD002171_protein_fasta/nextflow_report.html" \
     -with-timeline "PXD002171_protein_fasta/nextflow_timeline.html" \
     --main_fasta_file 20230619_homo_sapiens_proteome.fasta \
@@ -262,7 +262,7 @@ nextflow run main_workflow_protein_fasta.nf \
 
 ```shell
 # PXD028605 Precursor-Specific
-nextflow run main_workflow_precursor_specific_fasta.nf \
+NXF_VER=25.10.4 nextflow run main_workflow_precursor_specific_fasta.nf \
     -with-report "PXD028605_results_precursor_specific/nextflow_report.html" \
     -with-timeline "PXD028605_results_precursor_specific/nextflow_timeline.html" \
     --main_sp_embl_file 20230619_homo_sapiens_proteome.txt \
@@ -277,7 +277,7 @@ nextflow run main_workflow_precursor_specific_fasta.nf \
     --idc_fdr "0.01"
 
 # PXD028605 Global digested FASTA
-nextflow run main_workflow_global_fasta.nf \
+NXF_VER=25.10.4 nextflow run main_workflow_global_fasta.nf \
     -with-report "PXD028605_global_fasta/nextflow_report.html" \
     -with-timeline "PXD028605_global_fasta/nextflow_timeline.html" \
     --main_sp_embl_file 20230619_homo_sapiens_proteome.txt \
@@ -289,7 +289,7 @@ nextflow run main_workflow_global_fasta.nf \
     --idc_fdr "0.01"
 
 # PXD028605 Protein FASTA
-nextflow run main_workflow_protein_fasta.nf \
+NXF_VER=25.10.4 nextflow run main_workflow_protein_fasta.nf \
     -with-report "PXD028605_protein_fasta/nextflow_report.html" \
     -with-timeline "PXD028605_protein_fasta/nextflow_timeline.html" \
     --main_fasta_file 20230619_homo_sapiens_proteome.fasta \
