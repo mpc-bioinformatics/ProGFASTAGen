@@ -86,9 +86,6 @@ pip install lxml
 pip install git+https://github.com/mafreitas/tdf2mzml
 # Needed to convert Bruker to mgf
 pip install alphatims
-# Needed to convert Bruker to mgf
-pip install pyopenms
-
 
 
 ##### Make all files in bin executable (excluding sub-directories) to be visible by processes in Nextflow
